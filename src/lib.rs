@@ -9,10 +9,12 @@
 #![feature(const_in_array_repeat_expressions)]
 #![feature(alloc_error_handler)]
 #![feature(exclusive_range_pattern)]
+#![feature(wake_trait)]
 
 extern crate alloc;
 
 pub mod interrupts;
+pub mod task;
 pub mod gdt;
 pub mod memory;
 pub mod allocator;
@@ -25,7 +27,7 @@ use utils::{QemuExitCode, exit_qemu, hlt_loop};
 use x86_64::VirtAddr;
 use bootloader::BootInfo;
 
-pub fn init(boot_info: &'static BootInfo){
+pub fn init(boot_info: &'static BootInfo) {
     gdt::init();
 
     unsafe {
@@ -43,6 +45,13 @@ pub fn init(boot_info: &'static BootInfo){
 
         interrupts::PICS.lock().initialize()
     };
+
+    // we must call it before interrupts as
+    // it may cause deadlock otherwise.
+    // CANNOT use this allocator out of kernel.
+    allocator::init_heap(MAPPER.lock().as_mut().unwrap(),
+                         PAGE_ALLOCATOR.lock().as_mut().unwrap())
+        .expect("heap allocation failed");
 
     x86_64::instructions::interrupts::enable();
 }

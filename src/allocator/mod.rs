@@ -44,7 +44,7 @@ unsafe impl GlobalAlloc for DummyAllocator {
 static ALLOCATOR: Locked<BlockAllocator> = Locked::new(BlockAllocator::new());
 
 pub const HEAP_START: usize = 0x_4444_4444_0000;
-pub const HEAP_SIZE: usize = 100 * 1024;
+pub const HEAP_SIZE: usize = 1024 * 1024; // The heap size is 1MB
 
 fn align_up(addr: usize, align: usize) -> usize {
     (addr + align - 1) & !(align - 1)

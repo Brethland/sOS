@@ -9,7 +9,7 @@ extern crate alloc;
 use core::panic::PanicInfo;
 use bootloader::{BootInfo, entry_point};
 use sos::println;
-use sos::utils::hlt_loop;
+use sos::task::{Task, executor::{Executor, SPAWNER}, keyboard::print_keypress};
 
 entry_point!(kernel_start);
 
@@ -17,18 +17,23 @@ entry_point!(kernel_start);
 pub fn kernel_start(boot_info: &'static BootInfo) -> ! {
     sos::init(boot_info);
 
+    #[cfg(test)]
+        tests_main();
+
     println!("Hello, world");
     sos::serial_println!("Hello from SOS");
 
-    #[cfg(test)]
-    tests_main();
+    let mut executor = Executor::new();
+    SPAWNER.add(Task::new(print_keypress()));
+    executor.run();
 
-    hlt_loop();
 }
 
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
+    use sos::utils::hlt_loop;
+
     println!("{}", info);
     hlt_loop();
 }
