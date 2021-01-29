@@ -1,0 +1,16 @@
+[package]
+name = "sos-boot"
+version = "0.1.0"
+authors = ["Brethland Yang <brethland@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+uefi = "0.7.0"
+uefi-services = "0.4.0"
+rlibc = "1.0.0"
+x86_64 = "^0.12.0"
+xmas-elf = "^0.7.0"
+
+[dependencies.lazy_static]
+version = "1.4.0"
+features = ["spin_no_std"]
